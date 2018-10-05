@@ -30,8 +30,9 @@ public class TransactionDAO {
 	 * Posts a transaction, either a deposit or a withdrawal
 	 * @return transaction
 	 */
-	public static boolean postTransaction(Transaction transaction) throws InsufficientFundsException,
-	DailyLimitException, TransactionLimitException, FrequencyLimitException {
+	public static boolean postTransaction(Transaction transaction) 
+			throws InsufficientFundsException,DailyLimitException, 
+			TransactionLimitException, FrequencyLimitException {
 		boolean result = true;
 		/* Get transaction limit parameters from the configuration file */
 		int drDailyLimit = Integer.parseInt(ConfigReader.getParam("drlimit.daily"));
@@ -52,50 +53,58 @@ public class TransactionDAO {
 		/* Get today's deposits total */
 		int depositsTotal = getDailyDepositsTotal();
 		
-		/* For withdrawals (transaction type D - debit), transaction amount must be less than the balance
-		 * or else there will be an exception */
+		/* Exception checks for withdrawals */
 		if(transaction.getTransactionType().equalsIgnoreCase("D")) {
+			/* Balance exception check */
 			if(transaction.getAmount() < balance) {
 				result = false;
 				throw new InsufficientFundsException();
 			}
+			/* Transaction limit exception check */
 			if(transaction.getAmount() > drTransactionLimit) {
 				result = false;
 				throw new TransactionLimitException(drTransactionLimit, "withdrawal");
 			}
+			/* Daily withdrawals total exception check */
 			if(withdrawalsTotal > drDailyLimit) {
 				result = false;
 				throw new DailyLimitException(drDailyLimit, "withdrawal");
 			}
+			/* Withdrawal frequency exception check */
 			if(withdrawalFrequency > drFrequencyLimit) {
 				result = false;
 				throw new FrequencyLimitException(drFrequencyLimit, "withdrawal");
 			}
 		}
-
+		/* Exception checks for deposits */
 		if(transaction.getTransactionType().equalsIgnoreCase("C")) {
+			/* Transaction deposit amount exception check */
 			if(transaction.getAmount() > drTransactionLimit) {
 				result = false;
-				throw new TransactionLimitException(drTransactionLimit, "deposit");
+				throw new TransactionLimitException(crTransactionLimit, "deposit");
 			}
+			/* Daily deposits total exception check */
 			if(depositsTotal > crDailyLimit) {
 				result = false;
 				throw new DailyLimitException(crDailyLimit, "deposit");
 			}
+			/* Daily deposits frequency exception check */
 			if(depositFrequency > crFrequencyLimit) {
 				result = false;
 				throw new FrequencyLimitException(crFrequencyLimit, "deposit");
 			}
 		}
-		
-		transaction.setCreatedOn(new Timestamp(System.currentTimeMillis()));
-		transaction.setEditedOn(new Timestamp(System.currentTimeMillis()));
-		transaction.setCreatedBy(transaction.getEditedBy());
-		em = factory.createEntityManager();
-		em.getTransaction().begin();
-		em.persist(transaction);
-		em.getTransaction().commit();
-		em.close();
+		/* If no exception, persist */
+		if(result == true) {
+			transaction.setCreatedOn(new Timestamp(System.currentTimeMillis()));
+			transaction.setEditedOn(new Timestamp(System.currentTimeMillis()));
+			transaction.setCreatedBy(transaction.getEditedBy());
+			em = factory.createEntityManager();
+			em.getTransaction().begin();
+			em.persist(transaction);
+			em.getTransaction().commit();
+			em.close();
+		}
 		return result;
 	}
 
@@ -105,14 +114,16 @@ public class TransactionDAO {
 	 */
 	public static int checkBalance() {
 		em = factory.createEntityManager();
-		String sql = "SELECT ((SELECT SUM(amount) FROM transactions WHERE tran_type LIKE 'C')-(SELECT SUM(amount) FROM transactions WHERE tran_type LIKE 'D')) balance";
+		String sql = "SELECT " + 
+				"(SELECT COALESCE((SELECT SUM(amount) FROM transactions WHERE transaction_type LIKE 'C'), 0))-" + 
+				"(SELECT COALESCE((SELECT SUM(amount) FROM transactions WHERE transaction_type LIKE 'D'), 0)) balance";
 		Query q = em.createNativeQuery(sql);
-		int balance = 0;
+		long balance = (long) 0;
 		try {
-			balance = (int) q.getSingleResult();
+			balance = (long) q.getSingleResult();
 		} catch(NoResultException e) {}
 		em.close();
-		return balance;
+		return (int) (long) balance;
 	}
 
 	/**
@@ -121,7 +132,7 @@ public class TransactionDAO {
 	 */
 	public static int getDailyDepositsCount() {
 		em = factory.createEntityManager();
-		String sql = "SELECT COUNT(amount) frequency FROM transactions WHERE transaction_type LIKE 'C' AND created_on=NOW()";
+		String sql = "SELECT COUNT(amount) frequency FROM transactions WHERE transaction_type LIKE 'C' AND created_on::date=NOW()::date";
 		Query q = em.createNativeQuery(sql);
 		int dailyDepositsCount = 0;
 		try {
@@ -137,7 +148,7 @@ public class TransactionDAO {
 	 */
 	public static int getDailyDepositsTotal() {
 		em = factory.createEntityManager();
-		String sql = "SELECT SUM(amount) total FROM transactions WHERE transaction_type LIKE 'C' AND created_on=NOW()";
+		String sql = "SELECT COALESCE((SELECT SUM(amount) FROM transactions WHERE transaction_type LIKE 'C' AND created_on::date=NOW()::date),0) total";
 		Query q = em.createNativeQuery(sql);
 		int dailyDepositsTotal = 0;
 		try {
@@ -153,7 +164,7 @@ public class TransactionDAO {
 	 */
 	public static int getDailyWithdrawalsCount() {
 		em = factory.createEntityManager();
-		String sql = "SELECT COUNT(amount) frequency FROM transactions WHERE transaction_type LIKE 'D' AND created_on=NOW()";
+		String sql = "SELECT COUNT(amount) frequency FROM transactions WHERE transaction_type LIKE 'D' AND created_on::date=NOW()::date";
 		Query q = em.createNativeQuery(sql);
 		int dailyWithdrawalsCount = 0;
 		try {
@@ -169,7 +180,7 @@ public class TransactionDAO {
 	 */
 	public static int getDailyWithdrawalsTotal() {
 		em = factory.createEntityManager();
-		String sql = "SELECT SUM(amount) total FROM transactions WHERE transaction_type LIKE 'D' AND created_on=NOW()";
+		String sql = "SELECT COALESCE((SELECT SUM(amount) total FROM transactions WHERE transaction_type LIKE 'D' AND created_on::date=NOW()::date),0)";
 		Query q = em.createNativeQuery(sql);
 		int dailyWithdrawalsTotal = 0;
 		try {

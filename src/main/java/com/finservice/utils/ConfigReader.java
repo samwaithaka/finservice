@@ -11,8 +11,7 @@ public class ConfigReader {
 	private static InputStream propertiesStream;
 	private static Properties prop;
 
-	public ConfigReader() {
-	}
+	public ConfigReader() {}
 
 	public static String getParam(String key) {
 		ClassLoader classLoader = ConfigReader.class.getClassLoader();

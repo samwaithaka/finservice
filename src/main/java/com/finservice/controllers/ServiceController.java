@@ -5,17 +5,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import main.java.com.finservice.dao.TransactionDAO;
-import main.java.com.finservice.models.Blog;
 
 @RestController
-public class BlogController {
+public class ServiceController {
 	@RequestMapping("/")
 	public String index() {
-		return "Congratulations from BlogController.java";
+		return "Welcome to Fin Microservice";
 	}
 
-	@GetMapping("/blog")
-	public Blog getBlog(){
-		return TransactionDAO.fetchBlog();
+	@GetMapping("/balance")
+	public int checkBalance(){
+		return TransactionDAO.checkBalance();
 	}
 }
