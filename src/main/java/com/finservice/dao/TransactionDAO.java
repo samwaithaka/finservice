@@ -118,12 +118,12 @@ public class TransactionDAO {
 				"(SELECT COALESCE((SELECT SUM(amount) FROM transactions WHERE transaction_type LIKE 'C'), 0))-" + 
 				"(SELECT COALESCE((SELECT SUM(amount) FROM transactions WHERE transaction_type LIKE 'D'), 0)) balance";
 		Query q = em.createNativeQuery(sql);
-		long balance = (long) 0;
+		int balance = 0;
 		try {
-			balance = (long) q.getSingleResult();
+			balance = (int)(long) q.getSingleResult();
 		} catch(NoResultException e) {}
 		em.close();
-		return (int) (long) balance;
+		return balance;
 	}
 
 	/**
@@ -136,7 +136,7 @@ public class TransactionDAO {
 		Query q = em.createNativeQuery(sql);
 		int dailyDepositsCount = 0;
 		try {
-			dailyDepositsCount = (int) q.getSingleResult();
+			dailyDepositsCount = (int)(long) q.getSingleResult();
 		} catch(NoResultException e) {}
 		em.close();
 		return dailyDepositsCount;
@@ -152,7 +152,7 @@ public class TransactionDAO {
 		Query q = em.createNativeQuery(sql);
 		int dailyDepositsTotal = 0;
 		try {
-			dailyDepositsTotal = (int) q.getSingleResult();
+			dailyDepositsTotal =  (int)(long) q.getSingleResult();
 		} catch(NoResultException e) {}
 		em.close();
 		return dailyDepositsTotal;
@@ -168,7 +168,7 @@ public class TransactionDAO {
 		Query q = em.createNativeQuery(sql);
 		int dailyWithdrawalsCount = 0;
 		try {
-			dailyWithdrawalsCount = (int) q.getSingleResult();
+			dailyWithdrawalsCount =  (int)(long) q.getSingleResult();
 		} catch(NoResultException e) {}
 		em.close();
 		return dailyWithdrawalsCount;
@@ -184,7 +184,7 @@ public class TransactionDAO {
 		Query q = em.createNativeQuery(sql);
 		int dailyWithdrawalsTotal = 0;
 		try {
-			dailyWithdrawalsTotal = (int) q.getSingleResult();
+			dailyWithdrawalsTotal =  (int)(long) q.getSingleResult();
 		} catch(NoResultException e) {}
 		em.close();
 		return dailyWithdrawalsTotal;
