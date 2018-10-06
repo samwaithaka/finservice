@@ -56,7 +56,7 @@ public class TransactionDAO {
 		/* Exception checks for withdrawals */
 		if(transaction.getTransactionType().equalsIgnoreCase("D")) {
 			/* Balance exception check */
-			if(transaction.getAmount() < balance) {
+			if(transaction.getAmount() > balance) {
 				result = false;
 				throw new InsufficientFundsException();
 			}

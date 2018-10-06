@@ -1,13 +1,11 @@
 package test.java.com.finservice.tests;
 
-import main.java.com.finservice.models.Transaction;
 import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import main.java.com.finservice.dao.TransactionDAO;
 
 public class TransactionDAOTest {
-    Transaction transaction = new Transaction();
 
     @Test
     public void checkBalanceTest() {
