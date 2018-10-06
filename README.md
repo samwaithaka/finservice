@@ -14,11 +14,17 @@ Installing
 2. Create a Postgres database and database user, and grant privileges, as per the following commands:
 
 postgres=# CREATE DATABASE finservice_db;
+
 CREATE DATABASE
+
 postgres=# CREATE USER finservice_user WITH PASSWORD 'fdpafdfs444d^GD';
+
 CREATE ROLE
+
 postgres=# GRANT ALL PRIVILEGES ON DATABASE finservice_db TO finservice_user;
+
 GRANT
+
 postgres=# 
 
 3. Clone the project onto the deployment machine
