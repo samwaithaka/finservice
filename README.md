@@ -3,7 +3,7 @@ Simple Account Transaction Microservice
 This project is a microservice for account transactions, that handles the following: account balance query, account deposits and account withdraws. It effects withdrawal and deposits amount limits, per transaction as well as per day. It effects frequency limit as well.
 
 Getting Started
-The service can run on any server by running Maven package, and running the packaged jar, as will be shown shortly.
+The service can run on any server by running JVM, by running the packaged jar, as will be shown shortly.
 
 Prerequisites
 - Maven
